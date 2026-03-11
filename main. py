@@ -1,0 +1,34 @@
+import telebot
+
+TOKEN = "8695918346:AAFuXgc1dwLEa5ytKShzWoNOt05yjbmhvII"
+bot = telebot.TeleBot(TOKEN)
+
+LOSS_LIMIT = 1.99  
+ALERT_COUNT = 5    
+user_stats = {"losses": 0}
+
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.send_message(message.chat.id, "🚀 البوت شغال أونلاين 24 ساعة يا محمد!\nابعت رقم الدور دلوقتي.")
+
+@bot.message_handler(func=lambda message: True)
+def handle_msg(message):
+    global user_stats
+    try:
+        val = float(message.text)
+        if val <= LOSS_LIMIT:
+            user_stats["losses"] += 1
+            status = "❌ خسارة"
+        else:
+            user_stats["losses"] = 0
+            status = "✅ ربح"
+            
+        res = f"{status} ({val})\nالعداد: {user_stats['losses']}"
+        if user_stats["losses"] >= ALERT_COUNT:
+            res += f"\n\n⚠️⚠️ تنبيه! اللعبة سخنة بقالها {user_stats['losses']} أدوار!"
+        
+        bot.send_message(message.chat.id, res)
+    except:
+        bot.send_message(message.chat.id, "ابعت أرقام بس يا بطل.")
+
+bot.polling()
